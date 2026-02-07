@@ -2,5 +2,7 @@
   "name": "lazybee-plugin",
   "version": "1.0.0",
   "description": "LazyBee 개인 Side 프로젝트 전용 Claude Code 플러그인. 개발 워크플로우 자동화, 프로젝트 스캐폴딩, 코드 문서화 등을 지원합니다.",
-  "author": "lazybee"
+  "author": {
+    "name": "lazybee"
+  }
 }
