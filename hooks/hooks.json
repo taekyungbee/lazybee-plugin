@@ -1,0 +1,39 @@
+{
+  "description": "코드 품질, 보안, 컨벤션 검증 훅",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "실행할 Bash 명령을 검토하라. 다음에 해당하면 deny 판정:\n1. rm -rf / 또는 rm -rf ~ 등 루트/홈 전체 삭제\n2. git push --force main 또는 git push --force origin main\n3. git reset --hard (uncommitted 변경사항 소실)\n4. DROP DATABASE, DROP TABLE (프로덕션 DB 삭제)\n5. chmod 777 (과도한 권한)\n6. curl | bash 또는 wget | sh (원격 스크립트 실행)\n해당하지 않으면 approve.",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "파일 경로와 내용을 검토하라.\n\n[민감 파일 차단] 다음 파일은 deny:\n- .env, .env.local, .env.production (환경변수)\n- **/credentials*, **/secrets*, **/*key*.json\n- ~/.ssh/*, ~/.aws/*\n\n[코딩 컨벤션] 다음 위반 시 deny하고 수정 요청:\n- TypeScript에서 `any` 타입 사용 (strict 모드)\n- 하드코딩 색상값 (#hex, rgb()) → CSS 변수 또는 Tailwind 사용\n- inline style (style={{...}}) → Tailwind 클래스 사용\n- class 컴포넌트 → 함수형 컴포넌트\n- API 키, 비밀번호 하드코딩\n\n위반 없으면 approve.",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/post-edit-check.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
