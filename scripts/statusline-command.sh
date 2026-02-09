@@ -20,7 +20,8 @@ OAUTH_CLIENT_ID="9d1c250a-e61b-44d9-88ed-5944d1962f5e"
 
 _get_creds() {
   if [[ "$OSTYPE" == "darwin"* ]]; then
-    security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null
+    security find-generic-password -s "Claude Code-credentials" -a "$USER" -w 2>/dev/null \
+      || security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null
   elif [ -f "$HOME/.claude/.credentials.json" ]; then
     cat "$HOME/.claude/.credentials.json" 2>/dev/null
   fi
@@ -67,15 +68,21 @@ _refresh_token() {
 _fetch_usage() {
   local creds token resp expires_at now_ms
 
-  creds=$(_get_creds) || return 1
-  token=$(echo "$creds" | jq -r '.claudeAiOauth.accessToken // empty')
-  [ -z "$token" ] && return 1
+  # 1순위: CLAUDE_CODE_OAUTH_TOKEN 환경 변수 (setup-token으로 생성한 장기 토큰)
+  if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+    token="$CLAUDE_CODE_OAUTH_TOKEN"
+  else
+    # 2순위: Keychain/credentials.json
+    creds=$(_get_creds) || return 1
+    token=$(echo "$creds" | jq -r '.claudeAiOauth.accessToken // empty')
+    [ -z "$token" ] && return 1
 
-  # 토큰 만료 확인 + 자동 갱신
-  expires_at=$(echo "$creds" | jq -r '.claudeAiOauth.expiresAt // 0')
-  now_ms=$(( $(date +%s) * 1000 ))
-  if [ "$now_ms" -gt "$expires_at" ]; then
-    token=$(_refresh_token "$creds") || return 1
+    # 토큰 만료 확인 + 자동 갱신
+    expires_at=$(echo "$creds" | jq -r '.claudeAiOauth.expiresAt // 0')
+    now_ms=$(( $(date +%s) * 1000 ))
+    if [ "$now_ms" -gt "$expires_at" ]; then
+      token=$(_refresh_token "$creds") || return 1
+    fi
   fi
 
   resp=$(curl -s --max-time 3 -H "Accept: application/json" \
@@ -85,9 +92,10 @@ _fetch_usage() {
     -H "anthropic-beta: oauth-2025-04-20" \
     "https://api.anthropic.com/api/oauth/usage" 2>/dev/null) || return 1
 
-  # 401이면 토큰 갱신 후 재시도
+  # 401이면 Keychain 토큰으로 갱신 재시도
   if echo "$resp" | jq -e '.error.type == "authentication_error"' >/dev/null 2>&1; then
-    token=$(_refresh_token "$creds") || return 1
+    [ -z "$creds" ] && creds=$(_get_creds)
+    [ -n "$creds" ] && token=$(_refresh_token "$creds") || return 1
     resp=$(curl -s --max-time 3 -H "Accept: application/json" \
       -H "Content-Type: application/json" \
       -H "User-Agent: claude-code/2.0.32" \
