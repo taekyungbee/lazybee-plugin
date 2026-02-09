@@ -147,14 +147,6 @@ else
   TOKEN_LABEL="${DIM}${TOKEN_K}k${RESET}"
 fi
 
-# 컨텍스트 임계값 라벨
-CTX_LABEL=""
-if [ "$PCT" -ge 90 ]; then
-  CTX_LABEL=" ${RED}CRITICAL${RESET}"
-elif [ "$PCT" -ge 80 ]; then
-  CTX_LABEL=" ${YELLOW}COMPRESS?${RESET}"
-fi
-
 # 사용 한도 라벨
 LIMIT_LABEL=""
 if [ "$FIVE_HR_PCT" -gt 0 ] || [ "$SEVEN_DAY_PCT" -gt 0 ]; then
@@ -187,7 +179,7 @@ BRANCH=""
 OUT="${WHITE} ${MODEL}${RESET}"
 [ -n "$DIR" ] && OUT="${OUT} ${CYAN} ${DIR##*/}${RESET}"
 [ -n "$BRANCH" ] && OUT="${OUT} ${MAGENTA} ${BRANCH}${RESET}"
-OUT="${OUT} ${DIM}|${RESET} ${BAR_COLOR}${BAR}${RESET} ${PCT}% ${TOKEN_LABEL}${CTX_LABEL}"
+OUT="${OUT} ${DIM}|${RESET} ${BAR_COLOR}${BAR}${RESET} ${PCT}% ${TOKEN_LABEL}"
 OUT="${OUT}${LIMIT_LABEL}"
 OUT="${OUT} ${DIM}|${RESET} ${COST_COLOR}\$${COST_FMT}${RESET}"
 OUT="${OUT} ${DIM}|${RESET} ${DIM}${MINS}m ${SECS}s${RESET}"
