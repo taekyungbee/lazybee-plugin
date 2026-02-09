@@ -157,8 +157,8 @@ _bar() {
   local filled=$((pct * width / 100))
   local empty=$((width - filled))
   local bar=""
-  [ "$filled" -gt 0 ] && bar=$(printf "%${filled}s" | tr ' ' '=')
-  [ "$empty" -gt 0 ] && bar="${bar}$(printf "%${empty}s" | tr ' ' '-')"
+  [ "$filled" -gt 0 ] && bar=$(printf "%${filled}s" | tr ' ' '█')
+  [ "$empty" -gt 0 ] && bar="${bar}$(printf "%${empty}s" | tr ' ' '░')"
   printf '%b' "${color}${bar}${RESET}"
 }
 
