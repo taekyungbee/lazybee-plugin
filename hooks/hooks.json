@@ -1,28 +1,6 @@
 {
-  "description": "코드 품질, 보안, Google TypeScript Style(gts) 컨벤션 검증 훅",
+  "description": "코드 품질, Google TypeScript Style(gts) 컨벤션 검증 훅",
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "실행할 Bash 명령을 검토하라. 다음에 해당하면 deny 판정:\n1. rm -rf / 또는 rm -rf ~ 등 루트/홈 전체 삭제\n2. git push --force main 또는 git push --force origin main\n3. git reset --hard (uncommitted 변경사항 소실)\n4. DROP DATABASE, DROP TABLE (프로덕션 DB 삭제)\n5. chmod 777 (과도한 권한)\n6. curl | bash 또는 wget | sh (원격 스크립트 실행)\n해당하지 않으면 approve.",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "파일 경로와 내용을 검토하라.\n\n[민감 파일 차단] 다음 파일은 deny:\n- .env, .env.local, .env.production (환경변수)\n- **/credentials*, **/secrets*, **/*key*.json\n- ~/.ssh/*, ~/.aws/*\n\n[Google TypeScript Style 컨벤션] .ts/.tsx/.js/.jsx 파일에서 다음 위반 시 deny하고 수정 요청:\n- var 사용 금지 → const/let 사용\n- == 또는 != 사용 금지 → === / !== 사용 (eqeqeq)\n- any 타입 사용 금지\n- @ts-ignore 사용 금지 → @ts-expect-error 사용\n- 더블쿼트 사용 금지 → 싱글쿼트 사용 (avoidEscape 허용)\n- trailing comma 필수 (es5 스타일)\n- Promise 미처리 금지 (no-floating-promises)\n- class 컴포넌트 금지 → 함수형 컴포넌트\n- 하드코딩 색상값 금지 → CSS 변수 또는 Tailwind\n- inline style 금지 → Tailwind 클래스\n- API 키, 비밀번호 하드코딩 금지\n\n위반 없으면 approve.",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
