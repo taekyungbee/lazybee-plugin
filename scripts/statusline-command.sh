@@ -177,32 +177,25 @@ else COST_COLOR="$GREEN"; fi
 BRANCH=""
 [ -n "$DIR" ] && BRANCH=$(git -C "$DIR" symbolic-ref --short HEAD 2>/dev/null)
 
-# 한 줄 출력 조립
-OUT="${WHITE}${MODEL}${RESET}"
-[ -n "$DIR" ] && OUT="${OUT} ${DIM}|${RESET} ${CYAN}${DIR##*/}${RESET}"
-[ -n "$BRANCH" ] && OUT="${OUT} ${MAGENTA}(${BRANCH})${RESET}"
+# 1줄: 기본 정보
+LINE1="${WHITE}${MODEL}${RESET}"
+[ -n "$DIR" ] && LINE1="${LINE1} ${DIM}|${RESET} ${CYAN}${DIR##*/}${RESET}"
+[ -n "$BRANCH" ] && LINE1="${LINE1} ${MAGENTA}(${BRANCH})${RESET}"
+LINE1="${LINE1} ${DIM}|${RESET} ${COST_COLOR}\$${COST_FMT}${RESET}"
+LINE1="${LINE1} ${DIM}|${RESET} ${GREEN}+${LINES_ADD}${RESET}/${RED}-${LINES_DEL}${RESET}"
+LINE1="${LINE1} ${DIM}|${RESET} ${DIM}${MINS}m${SECS}s${RESET}"
 
-# ctx:[bar]PCT%
-OUT="${OUT} ${DIM}|${RESET} ctx:[$(_bar "$PCT" 12)]${PCT}%"
+# 2줄: 프로그레스 바
+LINE2="ctx:[$(_bar "$PCT" 12)]${PCT}%"
 
-# 5h:[bar]PCT%(reset) wk:[bar]PCT%(reset)
 if [ "$FIVE_HR_PCT" -gt 0 ] || [ "$SEVEN_DAY_PCT" -gt 0 ]; then
   FIVE_RESET_LABEL=""
   [ -n "$FIVE_HR_RESET" ] && FIVE_RESET_LABEL="(${FIVE_HR_RESET})"
   SEVEN_RESET_LABEL=""
   [ -n "$SEVEN_DAY_RESET" ] && SEVEN_RESET_LABEL="(${SEVEN_DAY_RESET})"
 
-  OUT="${OUT} ${DIM}|${RESET} 5h:[$(_bar "$FIVE_HR_PCT" 12)]${FIVE_HR_PCT}%${FIVE_RESET_LABEL}"
-  OUT="${OUT} wk:[$(_bar "$SEVEN_DAY_PCT" 12)]${SEVEN_DAY_PCT}%${SEVEN_RESET_LABEL}"
+  LINE2="${LINE2} ${DIM}|${RESET} 5h:[$(_bar "$FIVE_HR_PCT" 12)]${FIVE_HR_PCT}%${FIVE_RESET_LABEL}"
+  LINE2="${LINE2} ${DIM}|${RESET} wk:[$(_bar "$SEVEN_DAY_PCT" 12)]${SEVEN_DAY_PCT}%${SEVEN_RESET_LABEL}"
 fi
 
-# $cost
-OUT="${OUT} ${DIM}|${RESET} ${COST_COLOR}\$${COST_FMT}${RESET}"
-
-# +lines/-lines
-OUT="${OUT} ${DIM}|${RESET} ${GREEN}+${LINES_ADD}${RESET}/${RED}-${LINES_DEL}${RESET}"
-
-# duration
-OUT="${OUT} ${DIM}|${RESET} ${DIM}${MINS}m${SECS}s${RESET}"
-
-printf '%b' "$OUT"
+printf '%b\n%b' "$LINE1" "$LINE2"
