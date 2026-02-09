@@ -18,13 +18,14 @@ fi
 # settings.json에 statusLine 설정 추가
 if [ -f "$SETTINGS" ]; then
   if ! jq -e '.statusLine' "$SETTINGS" >/dev/null 2>&1; then
-    jq '. + {"statusLine": {"command": "bash ~/.claude/statusline-command.sh", "refreshInterval": 5}}' "$SETTINGS" > "${SETTINGS}.tmp" \
+    jq '. + {"statusLine": {"type": "command", "command": "bash ~/.claude/statusline-command.sh", "refreshInterval": 5}}' "$SETTINGS" > "${SETTINGS}.tmp" \
       && mv "${SETTINGS}.tmp" "$SETTINGS"
   fi
 else
   cat > "$SETTINGS" <<'EOJSON'
 {
   "statusLine": {
+    "type": "command",
     "command": "bash ~/.claude/statusline-command.sh",
     "refreshInterval": 5
   }
